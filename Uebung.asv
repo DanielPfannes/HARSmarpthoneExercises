@@ -1,0 +1,20 @@
+clear all;
+loadedFile = load('Data/features.mat');
+featureTable = loadedFile.features;
+% normalize features
+featureTableSize = size(featureTable,2);
+featureTable{:,2:featureTableSize} = zscore(featureTable{:,2:featureTableSize});
+amountSamples = size(featureTable,1);
+ 
+W = ldaWeights(featureTable{:,2 : featureTableSize}, featureTable{:,1});
+Scores = featureTable{:,2 : featureTableSize} * W;
+
+scatter(Scores(1,:), zeros(amountSamples), 25, featureTable{:,1}, 'filled');
+
+function W = ldaWeights(X,L)
+Mdl = fitcdiscr(X,L);
+[W, LAMBDA] = eig(Mdl.BetweenSigma, Mdl.Sigma); 
+lambda = diag(LAMBDA);
+[lambda, SortOrder] = sort(lambda, 'descend');
+W = W(:, SortOrder);
+end
